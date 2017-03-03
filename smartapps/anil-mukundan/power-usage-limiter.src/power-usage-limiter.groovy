@@ -109,7 +109,7 @@ def meterHandler(evt) {
                  reset()
              }
 
-            if (isDaysQuotaUsed() && (outlet.switch == "on")) {
+            if (isDaysQuotaUsed()) {
                 // Done for the day
                 log.debug "Today's quota has been used up. Switching off ${outlet}"
                 outlet.off()
@@ -144,10 +144,8 @@ def meterHandler(evt) {
         } else if (isDaysQuotaUsed() && state.meterStatus == "OFF") {
             // If the meter is turned Off, after the days Quota has been reached (in which case the outlet would have been turned off)
             // then we can turn the outlet On again. 
-
-            if (outlet.switch == "off") {
-                outlet.on()
-            }
+            log.debug "Turning on ${outlet} since ${meter} has been turned off"
+            outlet.on()
         }
     }
 }
@@ -159,9 +157,7 @@ def switchOff() {
      
     // Switch off the outset
     log.debug "Switching off ${outlet}"
-    if (outlet.switch == "on") {
-        outlet.off()
-    }
+    outlet.off()
     
     // Schdule the outlet to be turned on again tomorrow
     log.debug "Scheduling to switch ${outlet} on again tomorrow."
@@ -171,9 +167,7 @@ def switchOff() {
 def switchOn() {
     // Switch on the outlet
     log.debug "Switching on ${meter}"
-    if (outlet.switch == "off") {
-        outlet.on()
-    }
+    outlet.on()
     
     // Reset the state for a new day!
 	reset()
