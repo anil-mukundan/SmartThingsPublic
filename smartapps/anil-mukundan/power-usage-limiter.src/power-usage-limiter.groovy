@@ -37,11 +37,8 @@ preferences {
     section("Power usage at idle") {
         input "idlePowerUsage", "number", required: true, title: "Watts?"
     }
-    section("Send Notifications?") {
-        input("recipients", "contact", title: "Send notifications to") {
-        input "phone", "phone", title: "Warn with text message (optional)",
-            description: "Phone Number", required: false
-        }
+    section("Notifications") {
+        input "sendPush", "bool", required: true, title: "Send Push Notifications?"
     }
 }
 
@@ -68,15 +65,7 @@ def outletOnHandler(evt) {
         if (isDaysQuotaUsed()) {
             if (state.meterStatus == "ON") {
                 log.debug "Attempting to turn on ${outlet} while ${meter} is on and the quota has been used up"
-                def message = "The ${outlet} has been switched on after days quota has been used!"
-                if (location.contactBookEnabled && recipients) {
-                    sendNotificationToContacts(message, recipients)
-                } else {
-                    if (phone) {
-                        log.debug "Sending message to ${phone}"
-                        sendSms(phone, message)
-                    } 
-                }
+                notifyIfNeeded("The ${meter} has been switched on after days quota has been used!. Turning off ${outlet}")
                 log.debug "Switching ${outlet} off"
                 outlet.off()
             }
@@ -101,7 +90,7 @@ def meterHandler(evt) {
              // If the metered device is turned ON while there is not usage timer set
              // (a) if the days Quota is used, turn the outlet off
              // (b) if the Quota is not yet done, set a usage timer to off it when it it will be
-
+			 notifyIfNeeded("The ${meter} has been switched on")
              log.debug "${meter} showing power consumed at ${meterValue} watts which is more than ${idlePowerUsage}"
 
              // If we have the wrong day set in state, reset it
@@ -128,11 +117,13 @@ def meterHandler(evt) {
         } else if (!isDaysQuotaUsed() && state.meterStatus == "OFF" && state.usageTimerSet) {
             // If the metered device is turned Off while the useage Timer is set, save the time it was used and
             // remove the usage timer.
+            notifyIfNeeded("The ${meter} has been switched off")
             log.debug "${meter} showing power consumed at ${meterValue} watts which is less than ${idlePowerUsage} watts"
 
            // Compute much time was spend in last usage and update the minutes used so far today.
            if (state.usageStartTime != null && state.usageStartTime.length() > 0) {
                state.minutesUsed = state.minutesUsed + timeDiffMinutes(Date.parse("M/d/yy h:mm:ss a", state.usageStartTime), new Date()).round(0)
+               notifyIfNeeded("The ${meter} was used for ${state.minutesUsed} minutes so far today")
                log.debug "${meter} was used for ${state.minutesUsed} minutes so far today"
            } 
 
@@ -152,6 +143,7 @@ def meterHandler(evt) {
 
 def switchOff() {
      // Done for the day
+     notifyIfNeeded("The ${meter} has been used for the alloted time for today")
      state.minutesUsed = minutesAllowed;
      state.usageTimerSet = false;
      
@@ -205,5 +197,14 @@ def reset() {
  */
  def isDaysQuotaUsed() {
      return (state.minutesUsed >= minutesAllowed)
+ }
+ 
+ /*
+  * Send Notification
+  */
+ def notifyIfNeeded(String message) {
+    if (sendPush) {
+        sendPush(message)
+    }
  }
  
