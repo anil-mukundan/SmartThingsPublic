@@ -88,6 +88,7 @@ def handleSecurityBreach() {
 def notifySecurityBreach() {
     log.debug "Notify Security Breach to Phone: ${phone}"
     def message = "Possible Security Breach at Home. Alarms will be triggered in a minute, Switch to Home mode to cancel"
+    sendPush(message)
     sendSms(phone, message)
     if (altPhone) {
        log.debug "Notify Security Breach to Phone: ${AltPhone}"
