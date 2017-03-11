@@ -113,7 +113,7 @@ def onAlerts() {
 }
 
 def offAlerts() {
-    log.debug "Recieved message to trigger Security Alarms"
+    log.debug "Recieved message to switch off Security Alarms"
     log.debug "Switching off Security Alarms"
     alarms.off()
     state.alarmStatus = "OFF"
