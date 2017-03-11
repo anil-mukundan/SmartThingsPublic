@@ -34,11 +34,14 @@ preferences {
         input (name: "alarmDuration", type: "number", required: true, title: "For how many minutes?")
         input (name: "leadTime", type: "number", required: true, title: "Wait how many minutes before sounding alarm?")
     }
+    section("Switches to turn on") {
+        input(name: "switches", type: "capability.switch", title: "Turn on these switches...", required: true, multiple: true, description: null)
+    }
     section("Notify on Breach") {
         input("recipients", "contact", title: "Send notifications to") {
             input (name: "phone", type: "phone", title: "Phone number to Alert",
                 description: "Phone Number", required: true)
-            input (name: "altPhone", type: "phone", title: "Alernate Phone number to Alert",
+            input (name: "altPhone", type: "phone", title: "Alternate Phone number to Alert",
                 description: "Phone Number", required: false)    
         }
     }
@@ -99,8 +102,9 @@ def notifySecurityBreach() {
 def onAlerts() {
     log.debug "Recieved message to trigger Security Alarms"
     if (location.currentMode == "Away") {
-        log.debug "Triggering Security Alarms"
+        log.debug "Triggering Security Alarms and Switches"
     	alarms.siren()
+        switches.on()
     	log.debug "Trigger Security Alarm to switch off in ${alarmDuration} minutes" 
     	runIn(alarmDuration * 60, offAlerts)
     } else {
