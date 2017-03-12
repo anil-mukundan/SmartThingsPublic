@@ -18,7 +18,7 @@ definition(
     namespace: "anil-mukundan",
     author: "Anil Mukundan",
     description: "Special handling for doors with screens",
-    category: "",
+    category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
