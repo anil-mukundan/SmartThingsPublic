@@ -17,7 +17,7 @@ definition(
     name: "Security System",
     namespace: "anil-mukundan",
     author: "Anil Mukundan",
-    description: "Security Smart App that monitors my home while I am away.",
+    description: "Security Smart App that monitors my home while I am away or asleep.",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/SafetyAndSecurity/App-AudioVisualSmokeAlarm.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/SafetyAndSecurity/App-AudioVisualSmokeAlarm@2x.png",
@@ -65,13 +65,13 @@ def initialize() {
 }
 
 def doorHandler(evt) {
-	if (location.currentMode == "Away") {
+	if (location.currentMode == "Away" || location.currentMode == "Night") {
        handleSecurityBreach()
     }
 }
 
 def motionHandler(evt) {
-    if (location.currentMode == "Away") {
+    if (location.currentMode == "Away" || location.currentMode == "Night" ) {
        handleSecurityBreach()
     }
 }
@@ -80,6 +80,7 @@ def handleSecurityBreach() {
     log.debug "Security Breach Detected!"
     if (state.alarmStatus == "OFF") { 
         notifySecurityBreach()
+        switches.on()
         log.debug "Trigger Security Alarm in ${leadTime} minutes"
 	    runIn(leadTime * 60, onAlerts)
         state.alarmStatus = "ON"
@@ -90,7 +91,7 @@ def handleSecurityBreach() {
 
 def notifySecurityBreach() {
     log.debug "Notify Security Breach to Phone: ${phone}"
-    def message = "Possible Security Breach at Home. Alarms will be triggered in a minute, Switch to Home mode to cancel"
+    def message = "Possible security breach at Home. Alarms will be triggered in ${leadTime} minutes(s), Switch to Home, Home Alone or Up at Night mode to cancel"
     sendPush(message)
     sendSms(phone, message)
     if (altPhone) {
@@ -101,14 +102,13 @@ def notifySecurityBreach() {
 
 def onAlerts() {
     log.debug "Recieved message to trigger Security Alarms"
-    if (location.currentMode == "Away") {
+    if (location.currentMode == "Away" || location.currentMode == "Night") {
         log.debug "Triggering Security Alarms and Switches"
     	alarms.siren()
-        switches.on()
     	log.debug "Trigger Security Alarm to switch off in ${alarmDuration} minutes" 
     	runIn(alarmDuration * 60, offAlerts)
     } else {
-        log.debug "Home is no longer in Away Mode. Cancelling Security Alarms"
+        log.debug "Home is no longer in Away or Night Mode. Cancelling Security Alarms"
     }
 }
 
