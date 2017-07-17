@@ -120,7 +120,9 @@ def meterHandler(evt) {
            // Compute much time was spend in last usage and update the minutes used so far today.
            if (state.usageStartTime != null && state.usageStartTime.length() > 0) {
                state.minutesUsed = state.minutesUsed + timeDiffMinutes(Date.parse("M/d/yy h:mm:ss a", state.usageStartTime), new Date()).round(0)
-               notifyIfNeeded("The ${meter} was used for ${state.minutesUsed} minutes so far today")
+               if (state.minutesUsed > 0) {
+                   notifyIfNeeded("The ${meter} was used for ${state.minutesUsed} minutes so far today")
+               }
                log.debug "${meter} was used for ${state.minutesUsed} minutes so far today"
            } 
 
